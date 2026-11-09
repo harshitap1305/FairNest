@@ -1,0 +1,17 @@
+n_students: 200
+n_beds: 100
+cycles: 20
+seeds: 30
+p_confirm: 0.85
+p_group: 0.4
+max_group_size: 4
+p_tier0: 0.03
+fill_rule: EXACT
+group_weight_policy: MEAN
+c_init: 3
+c_min: 0
+c_max: 10
+carry_over_factor: 0.5
+max_cascade_rounds: 3
+apply_carry_over: true
+skew_credits: false
