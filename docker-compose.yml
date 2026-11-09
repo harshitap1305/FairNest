@@ -1,0 +1,42 @@
+services:
+  mongo:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports: ["27017:27017"]
+    volumes: ["mongo_data:/data/db"]
+    healthcheck:
+      test: >
+        echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}) }"
+        | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      retries: 30
+
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports: ["8000:8000"]
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build: ./backend
+    command: python -m app.worker
+    env_file: .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    ports: ["5173:80"]
+    depends_on: [backend]
+
+volumes:
+  mongo_data: {}

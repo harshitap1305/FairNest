@@ -1,0 +1,29 @@
+# Python bytecode & tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.venv/
+venv/
+
+# Secrets & local environment
+.env
+.env.local
+.env.*.local
+
+# Node / Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# Simulator generated artifacts
+simulator/results/
+*.png

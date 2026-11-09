@@ -1,0 +1,41 @@
+services:
+  mongo_test:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
+    ports:
+      - "27018:27018"
+    healthcheck:
+      test: >
+        mongosh --port 27018 --quiet --eval "
+        try { if (!rs.status().ok) throw 'not_ok'; }
+        catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo_test:27018'}]}); }
+        quit(db.hello().isWritablePrimary ? 0 : 1);"
+      interval: 3s
+      timeout: 15s
+      retries: 20
+      start_period: 5s
+    networks:
+      - test_net
+
+  backend_test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      mongo_test:
+        condition: service_healthy
+    environment:
+      MONGO_URI: "mongodb://mongo_test:27018/?replicaSet=rs0"
+      MONGO_DB: "fairnest_test"
+      JWT_SECRET: "test_jwt_secret_32_chars_minimum_!"
+      COOKIE_SECURE: "false"
+      CORS_ORIGINS: "http://localhost:5173"
+      LOG_LEVEL: "WARNING"
+    volumes:
+      - ./backend:/app
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
+    networks:
+      - test_net
+
+networks:
+  test_net:
