@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings
+
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
+_ROOT_ENV = _BACKEND_DIR.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -39,7 +43,11 @@ class Settings(BaseSettings):
     # Scheduling
     MIN_WINDOW_MINUTES: int = 60
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+    model_config = {
+        "env_file": (str(_ROOT_ENV), ".env"),
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
 
     @property
     def cors_origins_list(self) -> list[str]:

@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+
 from pymongo.errors import OperationFailure
+
+logger = logging.getLogger(__name__)
 
 
 async def create_validators(db) -> None:
@@ -33,11 +37,20 @@ async def create_validators(db) -> None:
                 validationLevel="moderate",
                 validationAction="error",
             )
-        except OperationFailure:
-            # Collection doesn't exist yet — create it with the validator
-            await db.create_collection(
-                collection_name,
-                validator=validator,
-                validationLevel="moderate",
-                validationAction="error",
-            )
+        except OperationFailure as exc:
+            # Collection doesn't exist yet (or Atlas user lacks collMod privilege) — create it
+            try:
+                await db.create_collection(
+                    collection_name,
+                    validator=validator,
+                    validationLevel="moderate",
+                    validationAction="error",
+                )
+            except OperationFailure as create_exc:
+                if exc.code == 13 and create_exc.code == 48:
+                    logger.warning(
+                        "Skipping collMod validator update on existing collection %s (insufficient privileges)",
+                        collection_name,
+                    )
+                elif create_exc.code != 48:
+                    raise
