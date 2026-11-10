@@ -17,10 +17,34 @@ from app.db.validators import create_validators
 from app.repositories import catalogue as cat_repo, core_repos as repo, users as user_repo
 
 HOSTELS = [
-    {"name": "Boys Hostel 1", "code": "BH1", "allowed_gender": "M", "allowed_years": [1, 2, 3, 4]},
-    {"name": "Boys Hostel 2", "code": "BH2", "allowed_gender": "M", "allowed_years": [1, 2, 3, 4]},
-    {"name": "Girls Hostel 1", "code": "GH1", "allowed_gender": "F", "allowed_years": [1, 2, 3, 4]},
-    {"name": "Girls Hostel 2", "code": "GH2", "allowed_gender": "F", "allowed_years": [1, 2, 3, 4]},
+    {
+        "name": "Boys Hostel 1",
+        "code": "BH1",
+        "allowed_gender": "M",
+        "allowed_years": [1, 2, 3, 4],
+        "active": True,
+    },
+    {
+        "name": "Boys Hostel 2",
+        "code": "BH2",
+        "allowed_gender": "M",
+        "allowed_years": [1, 2, 3, 4],
+        "active": True,
+    },
+    {
+        "name": "Girls Hostel 1",
+        "code": "GH1",
+        "allowed_gender": "F",
+        "allowed_years": [1, 2, 3, 4],
+        "active": True,
+    },
+    {
+        "name": "Girls Hostel 2",
+        "code": "GH2",
+        "allowed_gender": "F",
+        "allowed_years": [1, 2, 3, 4],
+        "active": True,
+    },
 ]
 
 # Rooms per floor: (from, to, capacity) — giving ~25 beds/hostel = 100 total
@@ -54,6 +78,8 @@ async def main():
     for h_data in HOSTELS:
         existing = await cat_repo.get_hostel_by_code(db, h_data["code"])
         if existing:
+            if existing.get("active") is None:
+                await cat_repo.update_hostel(db, str(existing["_id"]), {"active": True})
             hostel_ids[h_data["code"]] = str(existing["_id"])
             print(f"  Hostel {h_data['code']} already exists")
             continue

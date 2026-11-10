@@ -10,7 +10,13 @@ from app.core import clock as _clock
 # ─────────────────────────── hostels ─────────────────────────────────────────
 
 async def create_hostel(db, doc: dict) -> str:
-    doc = {**doc, "_id": ObjectId(), "created_at": _clock.now(), "updated_at": _clock.now()}
+    doc = {
+        **doc,
+        "_id": ObjectId(),
+        "active": doc.get("active", True),
+        "created_at": _clock.now(),
+        "updated_at": _clock.now(),
+    }
     r = await db["hostels"].insert_one(doc)
     return str(r.inserted_id)
 
@@ -24,7 +30,7 @@ async def get_hostel_by_code(db, code: str) -> dict | None:
 
 
 async def list_hostels(db, active_only: bool = True) -> list[dict]:
-    q = {"active": True} if active_only else {}
+    q = {"active": {"$ne": False}} if active_only else {}
     return await db["hostels"].find(q).to_list(length=200)
 
 
