@@ -17,10 +17,15 @@ from app.repositories import users as user_repo
 
 async def main() -> None:
     settings = get_settings()
+    default_domain = (
+        settings.allowed_email_domains_list[0]
+        if settings.allowed_email_domains_list
+        else "iitbhilai.demo"
+    )
     email = (
         os.environ.get("BOOTSTRAP_SUPER_ADMIN_EMAIL")
         or settings.BOOTSTRAP_SUPER_ADMIN_EMAIL
-        or "admin@college.edu"
+        or f"admin@{default_domain}"
     ).strip().lower()
     password = os.environ.get("BOOTSTRAP_SUPER_ADMIN_PASSWORD")
     if not password:

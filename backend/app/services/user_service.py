@@ -67,6 +67,10 @@ async def import_students_csv(
         if not email or "@" not in email:
             errors.append(f"Row {row_no}: invalid or missing email")
             continue
+        allowed_domains = settings.allowed_email_domains_list
+        if allowed_domains and email.rsplit("@", 1)[-1] not in allowed_domains:
+            errors.append(f"Row {row_no}: email domain not allowed for '{email}'")
+            continue
         if not name:
             errors.append(f"Row {row_no}: missing name for '{email}'")
             continue
@@ -163,6 +167,9 @@ async def grant_role_by_email(
     email = (email or "").strip().lower()
     if not email or "@" not in email:
         raise ValidationError("Valid email is required")
+    allowed_domains = get_settings().allowed_email_domains_list
+    if allowed_domains and email.rsplit("@", 1)[-1] not in allowed_domains:
+        raise ValidationError(f"Email domain must be one of: {', '.join(allowed_domains)}")
     if role not in _VALID_ROLES:
         raise ValidationError(f"Invalid role: {role}")
     if email == actor.get("email", "").lower():

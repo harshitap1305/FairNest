@@ -108,8 +108,10 @@ async def live_env():
 
     settings = get_settings()
     orig_db = settings.MONGO_DB
+    orig_domains = settings.ALLOWED_EMAIL_DOMAINS
     test_db_name = f"fairnest_t_{uuid.uuid4().hex[:10]}"
     settings.MONGO_DB = test_db_name
+    settings.ALLOWED_EMAIL_DOMAINS = ""
 
     # Reset rate limiters & clock before each test
     login_limiter._buckets.clear()
@@ -134,6 +136,7 @@ async def live_env():
                 await raw_client.drop_database(test_db_name)
             finally:
                 settings.MONGO_DB = orig_db
+                settings.ALLOWED_EMAIL_DOMAINS = orig_domains
                 await close_db()
 
 

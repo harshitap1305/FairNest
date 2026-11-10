@@ -106,18 +106,29 @@ async def main():
                     })
         print(f"  Created hostel {h_data['code']} with 5 floors")
 
+    email_domain = (
+        settings.allowed_email_domains_list[0]
+        if settings.allowed_email_domains_list
+        else "iitbhilai.demo"
+    )
     print("Creating 300 demo students...")
     created_count = 0
+    updated_count = 0
     for i in range(1, 301):
         gender = "M" if i <= 150 else "F"
         hostel_code = rng.choice(["BH1", "BH2"] if gender == "M" else ["GH1", "GH2"])
         hid = hostel_ids[hostel_code]
         roll_no = f"2024{i:04d}"
-        email = f"student{i}@college.edu"
+        email = f"student{i}@{email_domain}"
         name = rng.choice(NAMES) + f" {i}"
         year = rng.choice([1, 2, 3, 4])
         existing = await user_repo.find_user_by_email(db, email)
         if existing:
+            continue
+        existing_by_roll = await user_repo.find_user_by_roll_no(db, roll_no)
+        if existing_by_roll:
+            await user_repo.update_user(db, str(existing_by_roll["_id"]), {"email": email})
+            updated_count += 1
             continue
         uid = await user_repo.create_user(db, {
             "roll_no": roll_no,
@@ -137,9 +148,9 @@ async def main():
         await repo.create_credit_account(db, uid, settings.C_INIT)
         created_count += 1
 
-    print(f"  Created {created_count} students")
+    print(f"  Created {created_count} students (updated email domain on {updated_count})")
     print("Demo data loaded successfully!")
-    print("Login: student1@college.edu / demo_password_123")
+    print(f"Login: student1@{email_domain} / demo_password_123")
     await close_db()
 
 

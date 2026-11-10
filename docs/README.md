@@ -11,6 +11,7 @@ FairNest is a **zero-payment, multi-hostel, fairness-aware hostel room booking a
 
 | Document | Audience | What It Covers |
 |---|---|---|
+| [Quick Setup Guide (Docker & Local)](../SETUP.md) | All Developers, Evaluators | Step-by-step installation, `.env` setup for `iitbhilai.demo`, Docker Compose & local native setup (Atlas or local `rs0`), seeding, tests, and troubleshooting. |
 | [System Architecture & Design](architecture.md) | Engineers, Architects | Modular monolith layering, Docker/native runtime topology, FastAPI API, background worker, MongoDB `rs0`, React 18 SPA + in-memory JWT/refresh rotation, request lifecycles. |
 | [Complete Features & Workflows](features.md) | Product, QA, Admins, Students | Every feature across all 5 RBAC roles (`STUDENT`, `WARDEN`, `ADMIN`, `AUDITOR`, `SUPER_ADMIN`), public auth pages, worker automation, and CLI tools, mapped to UI routes, endpoints, and services. |
 | [Unique Design Aspects & Core Algorithms](uniqueness-and-algorithms.md) | Faculty, Reviewers, Algorithm Engineers | Deep technical walkthrough of every novel FairNest innovation: unanimous consent, `[0, 10]` fairness credits, Efraimidis–Spirakis HMAC-SHA256 RSD, Tier-0 accessibility isolation, no-re-randomization cascade, commit–reveal auditability, single-live-release lock, one-time grace extension, natural room sorting, and comma-list dry-run parser. |

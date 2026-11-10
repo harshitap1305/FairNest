@@ -19,8 +19,8 @@ Copy [`.env.example`](../.env.example) to `.env` at the repository root and upda
 | `CORS_ORIGINS` | `http://localhost:5173` | `http://localhost:5173` | Comma-separated allowlist for CORS & CSRF Origin check. |
 | `FREEZE_HOURS_DEFAULT` | `48` | `48` | Default unanimous confirmation window when creating cycles. |
 | `LOG_LEVEL` | `INFO` | `INFO` | `structlog` JSON verbosity. |
-| `BOOTSTRAP_SUPER_ADMIN_EMAIL` | `admin@college.edu` | `""` | Default bootstrap hint email. |
-| `ALLOWED_EMAIL_DOMAINS` | `""` (empty allows all) | `""` | Optional comma-separated institutional email domain whitelist. |
+| `BOOTSTRAP_SUPER_ADMIN_EMAIL` | `admin@iitbhilai.demo` | `""` | Default bootstrap hint email. |
+| `ALLOWED_EMAIL_DOMAINS` | `iitbhilai.demo` | `""` | Optional comma-separated institutional email domain whitelist. |
 | `C_INIT` / `C_MIN` / `C_MAX` | *(optional env overrides)* | `3` / `0` / `10` | Fairness credit initial value and hard clamp bounds. |
 | `MIN_WINDOW_MINUTES` | *(optional env override)* | `60` | Minimum allowed scheduled open-to-close window length. |
 
@@ -76,7 +76,7 @@ npm install && npm run dev
 | Script | Purpose & Usage | Exit Behavior |
 |---|---|---|
 | [`create_super_admin.py`](../backend/scripts/create_super_admin.py) | Bootstraps or promotes a `SUPER_ADMIN` user (`--email`, `--password`, `--name`, or interactive prompt; enforces ≥12-character password) and initializes indexes/validators. | Exits `0` after idempotent upsert. |
-| [`load_demo_data.py`](../backend/scripts/load_demo_data.py) | Seeds 4 hostels (`BH1`, `BH2`, `GH1`, `GH2`), 5 floors each (~100 total beds), an initial open/ready cycle data scaffold, and 300 active demo students (`student1@college.edu`–`student300@college.edu`, password `demo_password_123`) with initial credit accounts (`3`). | Exits `0` idempotently. |
+| [`load_demo_data.py`](../backend/scripts/load_demo_data.py) | Seeds 4 hostels (`BH1`, `BH2`, `GH1`, `GH2`), 5 floors each (~100 total beds), and 300 active demo students (`student1@iitbhilai.demo`–`student300@iitbhilai.demo`, password `demo_password_123`) with initial credit accounts (`3`). | Exits `0` idempotently. |
 | [`verify_allocation.py`](../backend/scripts/verify_allocation.py) | Standalone cryptographic Round-1 verifier:<br>`python scripts/verify_allocation.py --cycle <CYCLE_ID>` | Prints `seed_ok`, `input_ok`, `output_ok`, hashes; exits `0` on full pass, `1` on tamper/mismatch. |
 | [`check_invariants.py`](../backend/scripts/check_invariants.py) | Audits all 6 global DB invariants (`HELD`/`CONFIRMED` room exclusivity + capacity, single `is_live` per room, single `MAIN` run per cycle, credit `[C_MIN, C_MAX]` bounds, 100% `ACCEPTED` on `CONFIRMED` allotments, ≤1 `ACCEPTED` membership per `(cycle_id, user_id)`). | Prints `All invariants OK ✓` (`0`) or lists violations (`1`). |
 
