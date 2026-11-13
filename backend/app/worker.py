@@ -78,6 +78,62 @@ async def run_expire_holds(db, client):
         await run_cascade(db, client, allotment["cycle_id"], actor_id="system")
 
 
+async def run_hold_reminders(db, now=None, reminder_hours: int | None = None) -> int:
+    """Nudge members who still have not accepted a hold that is about to expire.
+
+    Each allotment is reminded at most once: the ``reminder_sent_at`` flag is claimed
+    atomically, so several workers running in parallel never send duplicates.
+    Returns the number of notifications created.
+    """
+    from app.repositories.core_repos import create_notification
+
+    now = now or _clock.now()
+    hours = reminder_hours if reminder_hours is not None else get_settings().HOLD_REMINDER_HOURS
+    if hours <= 0:
+        return 0
+    horizon = now + timedelta(hours=hours)
+    candidates = await db["allotments"].find({
+        "status": "HELD",
+        "expires_at": {"$gt": now, "$lte": horizon},
+        "reminder_sent_at": None,
+    }).to_list(length=1000)
+
+    sent = 0
+    for allotment in candidates:
+        claimed = await db["allotments"].update_one(
+            {"_id": allotment["_id"], "status": "HELD", "reminder_sent_at": None},
+            {"$set": {"reminder_sent_at": now}},
+        )
+        if claimed.modified_count == 0:
+            continue
+        minutes_left = max(1, int((allotment["expires_at"] - now).total_seconds() // 60))
+        left = f"{minutes_left // 60}h {minutes_left % 60}m" if minutes_left >= 60 else f"{minutes_left}m"
+        room = "your offered room"
+        room_id = allotment.get("room_id")
+        if room_id and ObjectId.is_valid(str(room_id)):
+            room_doc = await db["rooms"].find_one({"_id": ObjectId(str(room_id))}, {"room_no": 1})
+            if room_doc and room_doc.get("room_no"):
+                room = f"room {room_doc['room_no']}"
+        for m in allotment.get("members", []):
+            if m.get("accept_status") != "PENDING":
+                continue
+            await create_notification(db, {
+                "user_id": m["user_id"],
+                "type": "HOLD_EXPIRING_SOON",
+                "title": "Action needed: room hold expiring soon",
+                "body": (
+                    f"Only {left} left to accept {room}. If every member has not accepted "
+                    "before the deadline, the room is released to the waitlist."
+                ),
+                "allotment_id": str(allotment["_id"]),
+                "read": False,
+            })
+            sent += 1
+    if sent:
+        logger.info("Sent %d hold-expiry reminders", sent)
+    return sent
+
+
 async def run_open_window(db, client):
     from app.repositories.catalogue import get_scheduled_to_open, transition_cycle_status
     from app.services.cycle_service import open_cycle_impl
@@ -232,6 +288,7 @@ async def main():
     tick = 0
     while True:
         try:
+            await run_hold_reminders(db)
             await run_expire_holds(db, client)
             await run_open_window(db, client)
             await run_close_window(db, client)

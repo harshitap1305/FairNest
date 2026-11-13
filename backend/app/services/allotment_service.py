@@ -342,6 +342,7 @@ async def extend_hold(
     await repo.update_allotment(db, allotment_id, {
         "expires_at": new_expires,
         "admin_extended": True,
+        "reminder_sent_at": None,  # re-arm the expiry reminder for the new deadline
         "admin_extend_reason": reason,
         "admin_extend_by": actor_id,
     })

@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     # Scheduling
     MIN_WINDOW_MINUTES: int = 60
 
+    # Reminders: notify members who have not accepted when a hold has this many hours left
+    HOLD_REMINDER_HOURS: int = 6
+
     model_config = {
         "env_file": (str(_ROOT_ENV), ".env"),
         "env_file_encoding": "utf-8",
