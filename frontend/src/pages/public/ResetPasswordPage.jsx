@@ -4,6 +4,8 @@ import { Box, Button, Paper, TextField, Typography, Alert } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { resetPassword } from '../../api/auth'
 import { getErrorMessage } from '../../utils/errors'
+import { MIN_PASSWORD_LENGTH } from '../../utils/password'
+import PasswordStrengthMeter from '../../components/common/PasswordStrengthMeter'
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
@@ -65,9 +67,10 @@ export default function ResetPasswordPage() {
             helperText={errors.password?.message}
             {...register('password', {
               required: 'Password is required',
-              minLength: { value: 12, message: 'Minimum 12 characters' },
+              minLength: { value: MIN_PASSWORD_LENGTH, message: `Use at least ${MIN_PASSWORD_LENGTH} characters` },
             })}
           />
+          <PasswordStrengthMeter password={watch('password')} />
           <TextField
             label="Confirm password"
             type="password"

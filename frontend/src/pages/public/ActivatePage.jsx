@@ -5,6 +5,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useForm } from 'react-hook-form'
 import { activate } from '../../api/auth'
 import { getErrorMessage } from '../../utils/errors'
+import { MIN_PASSWORD_LENGTH } from '../../utils/password'
+import PasswordStrengthMeter from '../../components/common/PasswordStrengthMeter'
 
 export default function ActivatePage() {
   const [searchParams] = useSearchParams()
@@ -70,9 +72,10 @@ export default function ActivatePage() {
                 helperText={errors.password?.message}
                 {...register('password', {
                   required: 'Password is required',
-                  minLength: { value: 12, message: 'Password must be at least 12 characters' },
+                  minLength: { value: MIN_PASSWORD_LENGTH, message: `Use at least ${MIN_PASSWORD_LENGTH} characters` },
                 })}
               />
+              <PasswordStrengthMeter password={watch('password')} />
               <TextField
                 label="Confirm Password"
                 type="password"
