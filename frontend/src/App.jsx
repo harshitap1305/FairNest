@@ -42,6 +42,9 @@ import VerifyAllocationPage from './pages/auditor/VerifyAllocationPage'
 // SuperAdmin pages
 import RolesAndAccessPage from './pages/superadmin/RolesAndAccessPage'
 
+// Shared pages
+import AccountPage from './pages/account/AccountPage'
+
 const ALL_ROLES = ['STUDENT', 'WARDEN', 'ADMIN', 'AUDITOR', 'SUPER_ADMIN']
 
 function RoleHome() {
@@ -80,6 +83,7 @@ export default function App() {
         {/* ── Shared authenticated notifications ── */}
         <Route element={<ProtectedLayout roles={ALL_ROLES} />}>
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/account" element={<AccountPage />} />
         </Route>
 
         {/* ── Student ── */}

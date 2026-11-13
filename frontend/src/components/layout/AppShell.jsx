@@ -12,9 +12,12 @@ import {
   Menu,
   MenuItem,
   Divider,
+  ListItemIcon,
 } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import LogoutIcon from '@mui/icons-material/Logout'
 import { useAuth } from '../../auth/AuthContext'
 import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '../../api/auth'
@@ -96,7 +99,14 @@ export default function AppShell() {
               </Box>
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem onClick={() => { handleMenuClose(); navigate('/account') }}>
+              <ListItemIcon><ManageAccountsIcon fontSize="small" /></ListItemIcon>
+              Account & security
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+              Logout
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
