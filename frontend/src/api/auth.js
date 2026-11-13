@@ -50,3 +50,9 @@ export const getUnreadNotificationCount = () =>
 
 export const markNotificationRead = (notificationId) =>
   client.post(`/me/notifications/${notificationId}/read`).then((r) => r.data)
+
+export const markAllNotificationsRead = () =>
+  client.post('/me/notifications/read-all').then((r) => r.data)
+
+export const getNotificationSummary = () =>
+  client.get('/me/notifications/summary').then((r) => r.data)
