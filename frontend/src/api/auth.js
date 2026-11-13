@@ -56,3 +56,6 @@ export const markAllNotificationsRead = () =>
 
 export const getNotificationSummary = () =>
   client.get('/me/notifications/summary').then((r) => r.data)
+
+export const getSecurityActivity = (limit = 20) =>
+  client.get('/me/security-activity', { params: { limit } }).then((r) => r.data)
