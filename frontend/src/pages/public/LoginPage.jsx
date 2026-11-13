@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import {
   Box,
@@ -9,7 +9,12 @@ import {
   Button,
   Typography,
   Stack,
+  Alert,
+  IconButton,
+  InputAdornment,
 } from '@mui/material'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { useAuth } from '../../auth/AuthContext'
 import ErrorAlert from '../../components/common/ErrorAlert'
 
@@ -24,8 +29,11 @@ const ROLE_HOME = {
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const notice = location.state?.notice
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -64,6 +72,7 @@ export default function LoginPage() {
             Sign in with your college email or roll number
           </Typography>
 
+          {notice && !error && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
           <ErrorAlert error={error} />
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -80,9 +89,22 @@ export default function LoginPage() {
               />
               <TextField
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 fullWidth
                 autoComplete="current-password"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword((v) => !v)}
+                        edge="end"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
                 {...register('password', { required: 'Password is required' })}
                 error={Boolean(errors.password)}
                 helperText={errors.password?.message}
