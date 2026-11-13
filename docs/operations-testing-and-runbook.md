@@ -23,6 +23,7 @@ Copy [`.env.example`](../.env.example) to `.env` at the repository root and upda
 | `ALLOWED_EMAIL_DOMAINS` | `iitbhilai.demo` | `""` | Optional comma-separated institutional email domain whitelist. |
 | `C_INIT` / `C_MIN` / `C_MAX` | *(optional env overrides)* | `3` / `0` / `10` | Fairness credit initial value and hard clamp bounds. |
 | `MIN_WINDOW_MINUTES` | *(optional env override)* | `60` | Minimum allowed scheduled open-to-close window length. |
+| `HOLD_REMINDER_HOURS` | `6` | `6` | Worker sends a one-time `HOLD_EXPIRING_SOON` reminder to non-accepted members when a hold has this many hours left. `0` disables reminders. |
 
 ---
 
@@ -105,7 +106,7 @@ npm install && npm run dev
 
 ## 5. Testing, Linting & Build Verification
 
-### Full Automated Test Inventory (**38 Verified Tests**)
+### Full Automated Test Inventory (**63 Verified Tests**)
 
 | Suite | File | Count | What Is Verified |
 |---|---|---|---|
@@ -115,6 +116,14 @@ npm install && npm run dev
 | **Backend Integration — Lifecycle** | [`test_allotments.py`](../backend/tests/integration/test_allotments.py) | `5` | End-to-end Round-1 allocation, commit–reveal audit verification (`seed_ok`, `input_ok`, `output_ok`), zero-payment unanimous confirm (`HELD → CONFIRMED`), decline cascade refill, self-cancel & cutoff guard, idempotent cycle credit settlement (`credit_ledger`), admin revoke rescue (`reinsert=True`), worker auto-grace extension (`try_extend_grace`) + expiry cascade. |
 | **Backend Concurrency** | [`test_concurrent_accept.py`](../backend/tests/concurrency/test_concurrent_accept.py) | `3` | Concurrent `asyncio.gather` member accepts promote cleanly once (`CONFIRMED`), `accept + decline` race preserves room integrity without double-booking, concurrent `Idempotency-Key` replay & payload conflict (`409 IDEMPOTENCY_CONFLICT`). |
 | **Backend Security & RBAC** | [`test_rbac.py`](../backend/tests/security/test_rbac.py) | `5` | Student `404` IDOR concealment on cross-hostel rooms/cycles/groups, Warden `403 HOSTEL_SCOPE_DENIED`, global vs scoped Auditor visibility, last active `SUPER_ADMIN` `409 LAST_SUPER_ADMIN` lockout protection, refresh token family revocation on replay (`401 TOKEN_REUSE`). |
+| **Backend Unit — Insights** | [`test_insights.py`](../backend/tests/unit/test_insights.py) | `6` | Demand counts (first choice, top-3, `1/rank` score, levels), draft/withdrawn exclusion, 3-application anonymity threshold, fill-rule-aware size competition, cascade-order waitlist position. |
+| **Backend Unit — CSV** | [`test_csv_export.py`](../backend/tests/unit/test_csv_export.py) | `3` | Formula-injection neutralisation, plain values/negative numbers untouched, quoting of commas and newlines. |
+| **Backend Integration — Notifications** | [`test_notifications.py`](../backend/tests/integration/test_notifications.py) | `3` | Mark-all-read isolation and idempotency, per-type summary, `?type=` filter and limit, `404` for malformed/foreign ids. |
+| **Backend Integration — Reminders** | [`test_hold_reminders.py`](../backend/tests/integration/test_hold_reminders.py) | `3` | Reminder only to `PENDING` members, single send under repeated passes, window/status filtering, opt-out with `0` hours. |
+| **Backend Integration — Account Security** | [`test_account_security.py`](../backend/tests/integration/test_account_security.py) | `2` | Current-device flag & ordering, per-device revoke, own-only security activity feed. |
+| **Backend Integration — Insights API** | [`test_insights_api.py`](../backend/tests/integration/test_insights_api.py) | `3` | Demand hidden until 3 applications, hostel scope `404`, waitlist positions after a real allocation. |
+| **Backend Integration — Exports** | [`test_exports.py`](../backend/tests/integration/test_exports.py) | `3` | Roster CSV content/order/status filter, injection-safe names, staff scope `403`, audit-log CSV. |
+| **Backend Integration — Overview** | [`test_overview.py`](../backend/tests/integration/test_overview.py) | `2` | Per-cycle counts before/after allocation, 6h expiring-hold window via the test clock, hostel scoping and student `403`. |
 | **Simulator Determinism** | [`test_determinism.py`](../simulator/tests/test_determinism.py) | `6` | Same-seed bit-identical replay, zero payment references, cascade waitlist refill consistency, multi-cycle bounded credit invariants, scenario config loading. |
 
 ### Execution Commands
@@ -133,6 +142,13 @@ cd simulator && PYTHONPATH=../backend:. pytest -v
 make lint
 cd frontend && npm run build
 ```
+
+### Continuous Integration
+
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests:
+
+- **backend**: starts a single-node `mongo:7` replica set, installs `backend/requirements.txt` on Python 3.11, runs the full backend suite and the simulator tests.
+- **frontend**: `npm ci`, `npm run lint`, `npm run build` on Node 20.
 
 ---
 
