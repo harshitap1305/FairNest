@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box, Grid, Paper, Typography, Tooltip, Chip } from '@mui/material'
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 
 const STATUS_COLORS = {
   AVAILABLE: { bg: '#e8f5e9', border: '#66bb6a', label: 'Available' },
@@ -8,8 +9,23 @@ const STATUS_COLORS = {
   BLOCKED: { bg: '#f5f5f5', border: '#bdbdbd', label: 'Blocked' },
 }
 
+export const DEMAND_STYLES = {
+  HIGH: { label: 'High demand', color: 'error' },
+  MEDIUM: { label: 'Popular', color: 'warning' },
+  LOW: { label: 'Some interest', color: 'info' },
+  NONE: { label: 'Not yet ranked', color: 'success' },
+}
+
+function demandTooltip(d) {
+  if (!d) return ''
+  if (!d.mentions) return 'No submitted application ranks this room yet.'
+  return `1st choice of ${d.first_choice} · top-3 of ${d.top3} · ranked by ${d.mentions} group${d.mentions === 1 ? '' : 's'}`
+}
+
 /**
  * Grid of room tiles for preference selection.
+ * Optional `demand` maps room_id -> { level, first_choice, top3, mentions } from the
+ * room-demand endpoint; when present each tile shows a popularity badge.
  */
 export default function RoomGrid({
   rooms = [],
@@ -17,6 +33,7 @@ export default function RoomGrid({
   groupSize = 1,
   fillRule = 'EXACT',
   onToggle,
+  demand = null,
 }) {
   if (rooms.length === 0) {
     return (
@@ -84,6 +101,18 @@ export default function RoomGrid({
                     }}
                     variant="outlined"
                   />
+                  {demand?.[rid] && demand[rid].level !== 'NONE' && (
+                    <Tooltip title={demandTooltip(demand[rid])} arrow>
+                      <Chip
+                        icon={demand[rid].level === 'HIGH' ? <LocalFireDepartmentIcon sx={{ fontSize: 12 }} /> : undefined}
+                        label={DEMAND_STYLES[demand[rid].level].label}
+                        size="small"
+                        color={DEMAND_STYLES[demand[rid].level].color}
+                        variant={demand[rid].level === 'HIGH' ? 'filled' : 'outlined'}
+                        sx={{ fontSize: '0.65rem', height: 18 }}
+                      />
+                    </Tooltip>
+                  )}
                   {!sizeFits && statusKey === 'AVAILABLE' && (
                     <Chip
                       label={`Size ${cap}`}
