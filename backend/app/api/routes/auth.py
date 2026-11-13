@@ -101,8 +101,16 @@ async def logout_all(response: Response, user=Depends(get_current_user), db=Depe
 
 
 @router.get("/auth/sessions")
-async def list_sessions(user=Depends(get_current_user), db=Depends(get_db)):
-    return await auth_service.list_sessions(db, str(user["_id"]))
+async def list_sessions(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+    return await auth_service.list_sessions(
+        db, str(user["_id"]), current_refresh_token=request.cookies.get(REFRESH_COOKIE)
+    )
+
+
+@router.get("/me/security-activity")
+async def get_security_activity(limit: int = 20, user=Depends(get_current_user), db=Depends(get_db)):
+    """Sign-ins, failed attempts and password/session changes on the caller's account."""
+    return await auth_service.list_security_activity(db, str(user["_id"]), limit=limit)
 
 
 @router.delete("/auth/sessions/{family_id}")

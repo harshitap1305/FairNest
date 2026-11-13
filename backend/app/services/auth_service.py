@@ -176,17 +176,64 @@ async def logout_all(db, user_id: str) -> None:
     await _audit(db, user_id, "", "LOGOUT_ALL", user_id)
 
 
-async def list_sessions(db, user_id: str) -> list[dict]:
+async def list_sessions(db, user_id: str, current_refresh_token: str | None = None) -> list[dict]:
+    """Active refresh-token families of a user, newest first.
+
+    When the caller's own refresh cookie is supplied, the matching session is flagged
+    ``current`` so the UI can label "this device" and avoid revoking it by mistake.
+    """
+    current_family = None
+    if current_refresh_token:
+        record = await user_repo.find_refresh_token(db, hash_token(current_refresh_token))
+        if record and record.get("user_id") == user_id:
+            current_family = record.get("family_id")
     sessions = await user_repo.list_active_sessions(db, user_id)
-    return [
+    out = [
         {
             "family_id": s["family_id"],
             "ip": s.get("ip", ""),
             "user_agent": s.get("user_agent", ""),
             "created_at": s["created_at"].isoformat() if s.get("created_at") else None,
             "expires_at": s["expires_at"].isoformat() if s.get("expires_at") else None,
+            "current": s["family_id"] == current_family,
         }
         for s in sessions
+    ]
+    out.sort(key=lambda x: not x["current"])  # stable: current device first
+    return out
+
+
+SECURITY_EVENT_ACTIONS = (
+    "LOGIN_SUCCESS",
+    "LOGIN_FAILED",
+    "ACCOUNT_LOCKED",
+    "ACTIVATE_ACCOUNT",
+    "PASSWORD_CHANGE",
+    "PASSWORD_RESET",
+    "LOGOUT_ALL",
+    "REVOKE_SESSION",
+    "TOKEN_REUSE_DETECTED",
+)
+
+
+async def list_security_activity(db, user_id: str, limit: int = 20) -> list[dict]:
+    """Recent security-relevant audit events about the user's own account."""
+    limit = max(1, min(limit, 100))
+    rows = await db["audit_logs"].find(
+        {
+            "action": {"$in": list(SECURITY_EVENT_ACTIONS)},
+            "$or": [{"target_id": user_id}, {"actor_id": user_id}],
+        },
+        {"action": 1, "ts": 1, "ip": 1, "after": 1},
+    ).sort("ts", -1).limit(limit).to_list(length=limit)
+    return [
+        {
+            "action": r["action"],
+            "ts": r["ts"].isoformat() if r.get("ts") else None,
+            "ip": r.get("ip", ""),
+            "reason": (r.get("after") or {}).get("reason"),
+        }
+        for r in rows
     ]
 
 
