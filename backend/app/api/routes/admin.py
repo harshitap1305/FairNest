@@ -25,7 +25,7 @@ from app.fairness.engine import (
 from app.repositories import catalogue as cat_repo
 from app.repositories import core_repos as repo
 from app.repositories import users as user_repo
-from app.services import user_service
+from app.services import overview_service, user_service
 
 router = APIRouter(tags=["admin"])
 
@@ -271,6 +271,12 @@ async def verify_accessibility(
 
 
 # ── Reports ───────────────────────────────────────────────────────────────────
+
+@router.get("/reports/overview")
+async def operations_overview(user=Depends(current_warden), db=Depends(get_db)):
+    """Live operations snapshot for the caller's hostels: per-cycle KPIs + items needing attention."""
+    return await overview_service.build_overview(db, filter_hostel_ids_for_user(user))
+
 
 @router.get("/reports/occupancy")
 async def occupancy_report(
