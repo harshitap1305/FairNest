@@ -60,7 +60,7 @@ export default function LoginPage() {
       alignItems="center"
       justifyContent="center"
       minHeight="100vh"
-      bgcolor="grey.50"
+      bgcolor="background.default"
       p={2}
     >
       <Card sx={{ maxWidth: 420, width: '100%' }}>

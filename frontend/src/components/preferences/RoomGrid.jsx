@@ -1,12 +1,21 @@
 import React from 'react'
 import { Box, Grid, Paper, Typography, Tooltip, Chip } from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 
-const STATUS_COLORS = {
-  AVAILABLE: { bg: '#e8f5e9', border: '#66bb6a', label: 'Available' },
-  HELD: { bg: '#fff8e1', border: '#ffa726', label: 'Held' },
-  CONFIRMED: { bg: '#e3f2fd', border: '#42a5f5', label: 'Confirmed' },
-  BLOCKED: { bg: '#f5f5f5', border: '#bdbdbd', label: 'Blocked' },
+const STATUS_BASE = {
+  AVAILABLE: { border: '#66bb6a', label: 'Available' },
+  HELD: { border: '#ffa726', label: 'Held' },
+  CONFIRMED: { border: '#42a5f5', label: 'Confirmed' },
+  BLOCKED: { border: '#bdbdbd', label: 'Blocked' },
+}
+
+// Tile tints derived from the border colour so they read well in light and dark mode
+function statusColors(theme) {
+  const strength = theme.palette.mode === 'dark' ? 0.18 : 0.12
+  return Object.fromEntries(
+    Object.entries(STATUS_BASE).map(([k, v]) => [k, { ...v, bg: alpha(v.border, strength) }])
+  )
 }
 
 export const DEMAND_STYLES = {
@@ -35,6 +44,9 @@ export default function RoomGrid({
   onToggle,
   demand = null,
 }) {
+  const theme = useTheme()
+  const STATUS_COLORS = statusColors(theme)
+  const selectedBg = alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.35 : 0.22)
   if (rooms.length === 0) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -74,7 +86,7 @@ export default function RoomGrid({
                   p: 1.5,
                   cursor: isClickable ? 'pointer' : 'not-allowed',
                   opacity: isClickable || isSelected ? 1 : 0.6,
-                  bgcolor: isSelected ? '#bbdefb' : colors.bg,
+                  bgcolor: isSelected ? selectedBg : colors.bg,
                   borderColor: isSelected ? 'primary.main' : colors.border,
                   borderWidth: isSelected ? 2 : 1,
                   transition: 'all 0.15s',
