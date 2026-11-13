@@ -339,10 +339,14 @@ async def get_my_fairness(
 async def get_my_notifications(
     unread_only: bool = False,
     unread: bool = False,
+    type: str | None = None,
     limit: int = 50,
     user=Depends(get_current_user), db=Depends(get_db)
 ):
-    notifications = await repo.list_notifications(db, str(user["_id"]), unread_only or unread, limit=limit)
+    limit = max(1, min(limit, 200))
+    notifications = await repo.list_notifications(
+        db, str(user["_id"]), unread_only or unread, limit=limit, type_=type
+    )
     return [{**n, "_id": str(n["_id"])} for n in notifications]
 
 
@@ -352,10 +356,25 @@ async def get_unread_count(user=Depends(get_current_user), db=Depends(get_db)):
     return {"unread_count": count}
 
 
+@router.get("/me/notifications/summary")
+async def get_notification_summary(user=Depends(get_current_user), db=Depends(get_db)):
+    """Unread total plus a per-type breakdown, used by the inbox filter chips."""
+    by_type = await repo.notification_type_counts(db, str(user["_id"]))
+    return {"unread_count": sum(by_type.values()), "unread_by_type": by_type}
+
+
+@router.post("/me/notifications/read-all")
+async def mark_all_notifications_read(user=Depends(get_current_user), db=Depends(get_db)):
+    updated = await repo.mark_all_notifications_read(db, str(user["_id"]))
+    return {"message": "All notifications marked as read", "updated": updated}
+
+
 @router.post("/me/notifications/{notification_id}/read")
 async def mark_notification_read(
     notification_id: str,
     user=Depends(get_current_user), db=Depends(get_db)
 ):
-    await repo.mark_notification_read(db, notification_id, str(user["_id"]))
+    found = await repo.mark_notification_read(db, notification_id, str(user["_id"]))
+    if not found:
+        raise NotFoundError("Notification not found")
     return {"message": "Marked as read"}

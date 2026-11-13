@@ -299,10 +299,12 @@ async def create_notification(db, doc: dict, session=None) -> str:
 
 
 async def list_notifications(db, user_id: str, unread_only: bool = False,
-                             limit: int = 50) -> list[dict]:
+                             limit: int = 50, type_: str | None = None) -> list[dict]:
     q: dict = {"user_id": user_id}
     if unread_only:
         q["read"] = False
+    if type_:
+        q["type"] = type_
     return await db["notifications"].find(q).sort(
         "created_at", -1
     ).limit(limit).to_list(length=limit)
@@ -313,11 +315,33 @@ async def count_unread_notifications(db, user_id: str) -> int:
 
 
 async def mark_notification_read(db, notification_id: str, user_id: str) -> bool:
+    """Mark one notification read. Returns False if it does not exist or is not the user's."""
+    if not ObjectId.is_valid(notification_id):
+        return False
     r = await db["notifications"].update_one(
         {"_id": ObjectId(notification_id), "user_id": user_id},
-        {"$set": {"read": True}},
+        {"$set": {"read": True, "read_at": _clock.now()}},
     )
-    return r.modified_count > 0
+    return r.matched_count > 0
+
+
+async def mark_all_notifications_read(db, user_id: str) -> int:
+    """Mark every unread notification of a user as read; returns how many changed."""
+    r = await db["notifications"].update_many(
+        {"user_id": user_id, "read": False},
+        {"$set": {"read": True, "read_at": _clock.now()}},
+    )
+    return r.modified_count
+
+
+async def notification_type_counts(db, user_id: str) -> dict[str, int]:
+    """Per-type count of a user's unread notifications (for inbox filter chips)."""
+    cursor = await db["notifications"].aggregate([
+        {"$match": {"user_id": user_id, "read": False}},
+        {"$group": {"_id": "$type", "n": {"$sum": 1}}},
+    ])
+    rows = await cursor.to_list(length=100)
+    return {str(r["_id"] or "OTHER"): r["n"] for r in rows}
 
 
 # ─────────────────────────── audit ───────────────────────────────────────────
