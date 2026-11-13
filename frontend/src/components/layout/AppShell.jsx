@@ -3,7 +3,6 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import {
   AppBar,
   Box,
-  CssBaseline,
   Drawer,
   IconButton,
   Toolbar,
@@ -13,11 +12,15 @@ import {
   MenuItem,
   Divider,
   ListItemIcon,
+  Tooltip,
 } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import LogoutIcon from '@mui/icons-material/Logout'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import { useColorMode } from '../../styles/ColorModeContext'
 import { useAuth } from '../../auth/AuthContext'
 import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '../../api/auth'
@@ -29,6 +32,7 @@ export default function AppShell() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
+  const { mode, toggle: toggleColorMode } = useColorMode()
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count'],
@@ -50,11 +54,13 @@ export default function AppShell() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'primary.main' }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#12355e' : theme.palette.primary.main),
+          color: '#fff',
+        }}
       >
         <Toolbar>
           <Typography
@@ -66,6 +72,12 @@ export default function AppShell() {
           >
             FairNest
           </Typography>
+
+          <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            <IconButton color="inherit" onClick={toggleColorMode} sx={{ mr: 1 }} aria-label="Toggle dark mode">
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
 
           <IconButton
             color="inherit"
