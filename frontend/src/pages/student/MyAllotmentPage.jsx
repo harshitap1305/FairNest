@@ -3,6 +3,7 @@ import { Box, Typography, Card, CardContent, Chip, Grid, Divider, Button, Alert 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getMyAllotment, cancelAllotment } from '../../api/allotment'
 import HoldPanel from '../../components/allotment/HoldPanel'
+import WaitlistCard from '../../components/allotment/WaitlistCard'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import ErrorAlert from '../../components/common/ErrorAlert'
@@ -36,6 +37,8 @@ export default function MyAllotmentPage() {
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" fontWeight={700} mb={3}>My Allotment</Typography>
       <ErrorAlert error={mutError} />
+
+      {(!allotment || allotment.status !== 'CONFIRMED') && <WaitlistCard />}
 
       {!allotment && (
         <Card elevation={2}>
