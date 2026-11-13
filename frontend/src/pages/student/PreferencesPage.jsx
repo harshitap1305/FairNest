@@ -13,6 +13,8 @@ import {
   getMyGroup, getApplication, saveApplication, submitApplication, withdrawApplication,
 } from '../../api/group'
 import RoomGrid from '../../components/preferences/RoomGrid'
+import DemandInsightsPanel from '../../components/preferences/DemandInsightsPanel'
+import { getRoomDemand } from '../../api/insights'
 import RankList from '../../components/preferences/RankList'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
@@ -28,6 +30,8 @@ export default function PreferencesPage() {
   const [fallback, setFallback] = useState('NONE')
   const [floorFilter, setFloorFilter] = useState('')
   const [onlyFitting, setOnlyFitting] = useState(true)
+  const [showDemand, setShowDemand] = useState(true)
+  const [sortBy, setSortBy] = useState('room')
   const [selectedFloorAdd, setSelectedFloorAdd] = useState('')
   const [mutError, setMutError] = useState(null)
   const [infoMsg, setInfoMsg] = useState(null)
@@ -59,6 +63,13 @@ export default function PreferencesPage() {
     queryKey: ['cycle-rooms', cycleId],
     queryFn: () => listRoomsInCycle(cycleId),
     enabled: Boolean(cycleId),
+  })
+
+  const { data: demand } = useQuery({
+    queryKey: ['room-demand', cycleId],
+    queryFn: () => getRoomDemand(cycleId),
+    enabled: Boolean(cycleId),
+    refetchInterval: 60_000,
   })
 
   const { data: floors = [] } = useQuery({
@@ -114,8 +125,10 @@ export default function PreferencesPage() {
   const groupSize = group?.size ?? group?.members?.filter((m) => m.status === 'ACCEPTED').length ?? 1
   const fillRule = activeCycle?.policy?.fill_rule || 'EXACT'
 
+  const demandByRoom = demand && !demand.insufficient_data ? demand.rooms : null
+
   const filteredRooms = useMemo(() => {
-    return rooms.filter((r) => {
+    const list = rooms.filter((r) => {
       if (floorFilter !== '' && String(r.floor_no) !== String(floorFilter)) return false
       if (onlyFitting) {
         const cap = Number(r.capacity)
@@ -123,7 +136,13 @@ export default function PreferencesPage() {
       }
       return true
     })
-  }, [rooms, floorFilter, onlyFitting, fillRule, groupSize])
+    if (sortBy !== 'room' && demandByRoom) {
+      const score = (r) => demandByRoom[r.room_id]?.score ?? 0
+      // Stable sort keeps natural room order among equally contested rooms
+      list.sort((a, b) => (sortBy === 'least' ? score(a) - score(b) : score(b) - score(a)))
+    }
+    return list
+  }, [rooms, floorFilter, onlyFitting, fillRule, groupSize, sortBy, demandByRoom])
 
   const payloadChoices = useMemo(
     () =>
@@ -315,6 +334,8 @@ export default function PreferencesPage() {
         </Alert>
       )}
 
+      {showDemand && <DemandInsightsPanel demand={demand} rooms={rooms} groupSize={groupSize} />}
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={7}>
           <Paper elevation={2} sx={{ p: 2 }}>
@@ -336,6 +357,24 @@ export default function PreferencesPage() {
                     </MenuItem>
                   ))}
                 </TextField>
+                {demandByRoom && (
+                  <TextField
+                    select
+                    label="Sort"
+                    size="small"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    sx={{ minWidth: 150 }}
+                  >
+                    <MenuItem value="room">Room number</MenuItem>
+                    <MenuItem value="least">Least contested</MenuItem>
+                    <MenuItem value="most">Most contested</MenuItem>
+                  </TextField>
+                )}
+                <FormControlLabel
+                  control={<Checkbox size="small" checked={showDemand} onChange={(e) => setShowDemand(e.target.checked)} />}
+                  label={<Typography variant="body2">Show demand</Typography>}
+                />
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -354,6 +393,7 @@ export default function PreferencesPage() {
               selected={selectedRoomIds}
               groupSize={groupSize}
               fillRule={fillRule}
+              demand={showDemand ? demandByRoom : null}
               onToggle={(room) => {
                 if (!canEdit) return
                 toggleRoom(room)
