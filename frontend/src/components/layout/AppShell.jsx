@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import {
   AppBar,
@@ -25,6 +25,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { useQuery } from '@tanstack/react-query'
 import { getUnreadNotificationCount } from '../../api/auth'
 import Sidebar from './Sidebar'
+import LoadingSpinner from '../common/LoadingSpinner'
 
 const DRAWER_WIDTH = 240
 
@@ -140,7 +141,10 @@ export default function AppShell() {
 
       <Box component="main" sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'background.default' }}>
         <Toolbar />
-        <Outlet />
+        {/* Pages are lazy-loaded; keep the shell visible while a page chunk loads */}
+        <Suspense fallback={<LoadingSpinner minHeight="60vh" />}>
+          <Outlet />
+        </Suspense>
       </Box>
     </Box>
   )

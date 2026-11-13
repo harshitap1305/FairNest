@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import RoleRoute from './auth/RoleRoute'
@@ -7,44 +7,44 @@ import AppShell from './components/layout/AppShell'
 
 // Public pages
 import LoginPage from './pages/public/LoginPage'
-import ActivatePage from './pages/public/ActivatePage'
-import ForgotPasswordPage from './pages/public/ForgotPasswordPage'
-import ResetPasswordPage from './pages/public/ResetPasswordPage'
+const ActivatePage = lazy(() => import('./pages/public/ActivatePage'))
+const ForgotPasswordPage = lazy(() => import('./pages/public/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/public/ResetPasswordPage'))
 
 // Student pages
-import StudentDashboard from './pages/student/Dashboard'
-import MyGroupPage from './pages/student/MyGroupPage'
-import PreferencesPage from './pages/student/PreferencesPage'
-import MyAllotmentPage from './pages/student/MyAllotmentPage'
-import CreditsPage from './pages/student/CreditsPage'
-import FairnessExplanationPage from './pages/student/FairnessExplanationPage'
-import NotificationsPage from './pages/student/NotificationsPage'
+const StudentDashboard = lazy(() => import('./pages/student/Dashboard'))
+const MyGroupPage = lazy(() => import('./pages/student/MyGroupPage'))
+const PreferencesPage = lazy(() => import('./pages/student/PreferencesPage'))
+const MyAllotmentPage = lazy(() => import('./pages/student/MyAllotmentPage'))
+const CreditsPage = lazy(() => import('./pages/student/CreditsPage'))
+const FairnessExplanationPage = lazy(() => import('./pages/student/FairnessExplanationPage'))
+const NotificationsPage = lazy(() => import('./pages/student/NotificationsPage'))
 
 // Admin pages
-import UsersPage from './pages/admin/UsersPage'
-import CycleListPage from './pages/admin/CycleListPage'
-import CycleEditorPage from './pages/admin/CycleEditorPage'
-import ReleaseSchedulerPage from './pages/admin/ReleaseSchedulerPage'
-import AllocationConsolePage from './pages/admin/AllocationConsolePage'
-import CascadePage from './pages/admin/CascadePage'
-import FairnessDashboardPage from './pages/admin/FairnessDashboardPage'
-import AuditLogPage from './pages/admin/AuditLogPage'
-import OverviewPage from './pages/admin/OverviewPage'
+const UsersPage = lazy(() => import('./pages/admin/UsersPage'))
+const CycleListPage = lazy(() => import('./pages/admin/CycleListPage'))
+const CycleEditorPage = lazy(() => import('./pages/admin/CycleEditorPage'))
+const ReleaseSchedulerPage = lazy(() => import('./pages/admin/ReleaseSchedulerPage'))
+const AllocationConsolePage = lazy(() => import('./pages/admin/AllocationConsolePage'))
+const CascadePage = lazy(() => import('./pages/admin/CascadePage'))
+const FairnessDashboardPage = lazy(() => import('./pages/admin/FairnessDashboardPage'))
+const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'))
+const OverviewPage = lazy(() => import('./pages/admin/OverviewPage'))
 
 // Warden pages
-import RoomsPage from './pages/warden/RoomsPage'
-import AccessibilityQueuePage from './pages/warden/AccessibilityQueuePage'
-import AllotmentMonitorPage from './pages/warden/AllotmentMonitorPage'
-import OccupancyPage from './pages/warden/OccupancyPage'
+const RoomsPage = lazy(() => import('./pages/warden/RoomsPage'))
+const AccessibilityQueuePage = lazy(() => import('./pages/warden/AccessibilityQueuePage'))
+const AllotmentMonitorPage = lazy(() => import('./pages/warden/AllotmentMonitorPage'))
+const OccupancyPage = lazy(() => import('./pages/warden/OccupancyPage'))
 
 // Auditor pages
-import VerifyAllocationPage from './pages/auditor/VerifyAllocationPage'
+const VerifyAllocationPage = lazy(() => import('./pages/auditor/VerifyAllocationPage'))
 
 // SuperAdmin pages
-import RolesAndAccessPage from './pages/superadmin/RolesAndAccessPage'
+const RolesAndAccessPage = lazy(() => import('./pages/superadmin/RolesAndAccessPage'))
 
 // Shared pages
-import AccountPage from './pages/account/AccountPage'
+const AccountPage = lazy(() => import('./pages/account/AccountPage'))
 
 const ALL_ROLES = ['STUDENT', 'WARDEN', 'ADMIN', 'AUDITOR', 'SUPER_ADMIN']
 
