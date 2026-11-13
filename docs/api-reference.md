@@ -157,6 +157,38 @@ All FairNest HTTP endpoints are mounted under the `/api/v1` prefix (except Nginx
 | `GET /api/v1/reports/rejections` | `AUDITOR+` (`filter_hostel_ids_for_user`) | Optional `?cycle_id=` | `{total_released, by_status: {DECLINED, EXPIRED, CANCELLED, REVOKED}}`. |
 | `GET /api/v1/admin/audit-logs` | `AUDITOR+` | `?actor_id=&target_type=&entity_type=&action=&skip=0&limit=50` | Enriched with `actor_email`, ordered by `ts desc`. |
 
+| `GET /api/v1/reports/overview` | `WARDEN+` (`filter_hostel_ids_for_user`) | — | Live snapshot of non-settled cycles: `{totals, cycles[{applications, held, confirmed, waitlisted, inventory_by_status, fill_rate, expiring_soon}], attention: {expiring_holds, closing_soon}}`. |
+
+### 7.1 Notification Inbox (`auth.py`)
+
+| Method & Path | Role & Scope | Params / Body | Response / Error Codes |
+|---|---|---|---|
+| `GET /api/v1/me/notifications` | Any authenticated | `?unread_only=&type=&limit=50` (limit clamped 1–200) | Newest-first list of the caller's notifications. |
+| `GET /api/v1/me/notifications/summary` | Any authenticated | — | `{unread_count, unread_by_type: {TYPE: n}}` for inbox filter chips. |
+| `POST /api/v1/me/notifications/read-all` | Any authenticated | — | `{updated: n}`; idempotent. |
+| `POST /api/v1/me/notifications/{id}/read` | Owner only | Path `id` | `404 NOT_FOUND` for malformed, missing or another user's id. Sets `read_at`. |
+
+### 7.2 Account Security (`auth.py`)
+
+| Method & Path | Role & Scope | Params / Body | Response / Error Codes |
+|---|---|---|---|
+| `GET /api/v1/auth/sessions` | Any authenticated | Refresh cookie (optional) | Active sessions, each with `current: true/false`; the caller's device is listed first. |
+| `GET /api/v1/me/security-activity` | Any authenticated | `?limit=20` (1–100) | Own `LOGIN_SUCCESS`, `LOGIN_FAILED`, `ACCOUNT_LOCKED`, `PASSWORD_CHANGE`, `PASSWORD_RESET`, `LOGOUT_ALL`, `REVOKE_SESSION`, `TOKEN_REUSE_DETECTED` events `{action, ts, ip, reason}`. |
+
+### 7.3 Student Insights (`insights.py`)
+
+| Method & Path | Role & Scope | Params / Body | Response / Error Codes |
+|---|---|---|---|
+| `GET /api/v1/cycles/{cycle_id}/room-demand` | Any role in hostel scope (student `404`, staff `403`) | — | Anonymous aggregate: `{applications_counted, insufficient_data, rooms: {room_id: {first_choice, top3, mentions, score, level}}, floors, by_size[{group_size, groups, matching_rooms, groups_per_room}]}`. Per-room data hidden below 3 applications. |
+| `GET /api/v1/cycles/{cycle_id}/waitlist/me` | `STUDENT` in hostel scope | — | `{on_waitlist, position, total_waitlisted, ahead_same_size, fitting_rooms_available, reinserted, group_size, status}`. `404` if the caller has no group/application. |
+
+### 7.4 CSV Exports (`exports.py`)
+
+| Method & Path | Role & Scope | Params / Body | Response / Error Codes |
+|---|---|---|---|
+| `GET /api/v1/admin/cycles/{cycle_id}/allotments.csv` | `WARDEN+` (`assert_staff_scope`) | `?status=` | `text/csv` attachment, one row per member (hostel, floor, room, status, round, rank, name, roll no, email, accept status, timestamps). Formula-like cells are prefixed with `'`. |
+| `GET /api/v1/admin/audit-logs.csv` | `AUDITOR+` | `?actor_id=&target_type=&action=&limit=5000` (max 10 000) | `text/csv` attachment of the filtered audit trail with actor emails. |
+
 ---
 
 ## 8. Backend Error Code Reference
