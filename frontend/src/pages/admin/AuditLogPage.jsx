@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, TextField, Collapse, IconButton, Chip,
+  TableHead, TableRow, TextField, Collapse, IconButton, Chip, Button,
 } from '@mui/material'
+import FileDownloadIcon from '@mui/icons-material/FileDownload'
+import { downloadAuditLogs } from '../../api/exports'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { useQuery } from '@tanstack/react-query'
@@ -53,6 +55,23 @@ function AuditRow({ entry }) {
 export default function AuditLogPage() {
   const [action, setAction] = useState('')
   const [targetType, setTargetType] = useState('')
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(null)
+
+  const exportCsv = async () => {
+    setExporting(true)
+    setExportError(null)
+    try {
+      await downloadAuditLogs({
+        action: action.trim() || undefined,
+        target_type: targetType.trim() || undefined,
+      })
+    } catch (e) {
+      setExportError(e)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const { data: logs, isLoading, error } = useQuery({
     queryKey: ['audit-logs', action, targetType],
@@ -67,9 +86,15 @@ export default function AuditLogPage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" fontWeight={700} mb={3}>Audit Log</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} mb={3}>
+        <Typography variant="h4" fontWeight={700}>Audit Log</Typography>
+        <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={exportCsv} disabled={exporting}>
+          {exporting ? 'Exporting…' : 'Export CSV'}
+        </Button>
+      </Box>
 
       {error && <ErrorAlert error={error} />}
+      <ErrorAlert error={exportError} />
 
       <Box display="flex" gap={2} mb={3} flexWrap="wrap">
         <TextField
