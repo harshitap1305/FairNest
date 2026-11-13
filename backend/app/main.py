@@ -95,7 +95,9 @@ def create_app() -> FastAPI:
         )
 
     # ── Routers ────────────────────────────────────────────────────────────────
-    from app.api.routes import admin, allotments, auth, catalogue, cycles, groups, health, insights
+    from app.api.routes import (
+        admin, allotments, auth, catalogue, cycles, exports, groups, health, insights,
+    )
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(auth.router, prefix="/api/v1")
     app.include_router(catalogue.router, prefix="/api/v1")
@@ -104,6 +106,7 @@ def create_app() -> FastAPI:
     app.include_router(allotments.router, prefix="/api/v1")
     app.include_router(admin.router, prefix="/api/v1")
     app.include_router(insights.router, prefix="/api/v1")
+    app.include_router(exports.router, prefix="/api/v1")
 
     return app
 
