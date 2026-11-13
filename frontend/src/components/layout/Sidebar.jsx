@@ -29,6 +29,7 @@ import MonitorIcon from '@mui/icons-material/Monitor'
 import OccupancyIcon from '@mui/icons-material/Apartment'
 import VerifiedIcon from '@mui/icons-material/VerifiedUser'
 import AdminPanelIcon from '@mui/icons-material/AdminPanelSettings'
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
 import { useAuth } from '../../auth/AuthContext'
 
 const NAV = {
@@ -42,6 +43,7 @@ const NAV = {
     { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
   ],
   WARDEN: [
+    { label: 'Overview', icon: <SpaceDashboardIcon />, path: '/warden/overview' },
     { label: 'Rooms', icon: <MeetingRoomIcon />, path: '/warden/rooms' },
     { label: 'Accessibility Queue', icon: <AccessibleIcon />, path: '/warden/accessibility' },
     { label: 'Allotment Monitor', icon: <MonitorIcon />, path: '/warden/allotments' },
@@ -49,6 +51,7 @@ const NAV = {
     { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
   ],
   ADMIN: [
+    { label: 'Overview', icon: <SpaceDashboardIcon />, path: '/admin/overview' },
     { label: 'Cycles', icon: <CycleIcon />, path: '/admin/cycles' },
     { label: 'Release Scheduler', icon: <ScheduleIcon />, path: '/admin/scheduler' },
     { label: 'Allocation Console', icon: <AllocationIcon />, path: '/admin/allocation' },
@@ -72,6 +75,7 @@ const NAV = {
   SUPER_ADMIN: [
     { label: 'Roles & Access', icon: <AdminPanelIcon />, path: '/superadmin/roles' },
     { label: 'Users', icon: <PeopleIcon />, path: '/superadmin/users' },
+    { label: 'Overview', icon: <SpaceDashboardIcon />, path: '/admin/overview' },
     { label: 'Cycles', icon: <CycleIcon />, path: '/admin/cycles' },
     { label: 'Release Scheduler', icon: <ScheduleIcon />, path: '/admin/scheduler' },
     { label: 'Allocation Console', icon: <AllocationIcon />, path: '/admin/allocation' },

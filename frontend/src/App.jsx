@@ -29,6 +29,7 @@ import AllocationConsolePage from './pages/admin/AllocationConsolePage'
 import CascadePage from './pages/admin/CascadePage'
 import FairnessDashboardPage from './pages/admin/FairnessDashboardPage'
 import AuditLogPage from './pages/admin/AuditLogPage'
+import OverviewPage from './pages/admin/OverviewPage'
 
 // Warden pages
 import RoomsPage from './pages/warden/RoomsPage'
@@ -99,7 +100,8 @@ export default function App() {
 
         {/* ── Admin ── */}
         <Route element={<ProtectedLayout roles={['ADMIN', 'SUPER_ADMIN']} />}>
-          <Route path="/admin" element={<CycleListPage />} />
+          <Route path="/admin" element={<OverviewPage />} />
+          <Route path="/admin/overview" element={<OverviewPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/cycles" element={<CycleListPage />} />
           <Route path="/admin/cycles/new" element={<CycleEditorPage />} />
@@ -118,6 +120,7 @@ export default function App() {
           <Route path="/warden/accessibility" element={<AccessibilityQueuePage />} />
           <Route path="/warden/allotments" element={<AllotmentMonitorPage />} />
           <Route path="/warden/occupancy" element={<OccupancyPage />} />
+          <Route path="/warden/overview" element={<OverviewPage />} />
         </Route>
 
         {/* ── Auditor ── */}
