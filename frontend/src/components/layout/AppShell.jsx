@@ -59,7 +59,7 @@ export default function AppShell() {
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#12355e' : theme.palette.primary.main),
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#331a5e' : theme.palette.primary.main),
           color: '#fff',
         }}
       >

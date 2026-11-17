@@ -7,16 +7,22 @@ export function buildTheme(mode = 'light') {
     palette: {
       mode,
       primary: {
-        main: dark ? '#64a1f4' : '#1565C0',
-        light: '#5e92f3',
-        dark: '#003c8f',
-        contrastText: dark ? '#0b1726' : '#ffffff',
+        main: dark ? '#9e7cd8' : '#4C2A85',
+        light: dark ? '#b99ee6' : '#7b5ab5',
+        dark: dark ? '#6e47b0' : '#331a5e',
+        contrastText: dark ? '#140b24' : '#ffffff',
       },
       secondary: {
         main: dark ? '#ff9e5e' : '#E65100',
         light: '#ff833a',
         dark: '#ac1900',
         contrastText: '#ffffff',
+      },
+      info: {
+        main: dark ? '#b39ddb' : '#4C2A85',
+        light: '#7b5ab5',
+        dark: '#331a5e',
+        contrastText: dark ? '#140b24' : '#ffffff',
       },
       background: dark
         ? { default: '#0f141a', paper: '#171e26' }
@@ -50,7 +56,7 @@ export function buildTheme(mode = 'light') {
       },
       MuiAppBar: {
         styleOverrides: {
-          root: dark ? { backgroundImage: 'none', backgroundColor: '#12355e' } : {},
+          root: dark ? { backgroundImage: 'none', backgroundColor: '#331a5e' } : {},
         },
       },
     },

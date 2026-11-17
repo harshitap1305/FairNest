@@ -83,7 +83,7 @@ export default function FairnessDashboardPage() {
                         <XAxis dataKey="band" />
                         <YAxis tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
                         <Tooltip formatter={(v) => `${v}%`} />
-                        <Bar dataKey="rate" fill="#1565C0" name="Success %" />
+                        <Bar dataKey="rate" fill="#4C2A85" name="Success %" />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -127,7 +127,7 @@ export default function FairnessDashboardPage() {
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="demand" fill="#E65100" name="Applications" />
-                        <Bar dataKey="supply" fill="#1565C0" name="Rooms" />
+                        <Bar dataKey="supply" fill="#4C2A85" name="Rooms" />
                       </BarChart>
                     </ResponsiveContainer>
                   )}

@@ -6,7 +6,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 const STATUS_BASE = {
   AVAILABLE: { border: '#66bb6a', label: 'Available' },
   HELD: { border: '#ffa726', label: 'Held' },
-  CONFIRMED: { border: '#42a5f5', label: 'Confirmed' },
+  CONFIRMED: { border: '#4C2A85', label: 'Confirmed' },
   BLOCKED: { border: '#bdbdbd', label: 'Blocked' },
 }
 
